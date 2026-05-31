@@ -132,7 +132,7 @@
       </div>
     </div>
     <div class="frameWrap">
-      <iframe id="pv" style="width:600px;height:100%;" title="Email preview"></iframe>
+      <iframe id="pv" style="width:680px;height:100%;" title="Email preview"></iframe>
     </div>
   </div>
 </div>
@@ -458,7 +458,13 @@ function fallbackCopy(txt,label){
 $('addPhoto').addEventListener('click', function(){ makePhotoRow(photoInputs.length); });
 $('btnCopy').addEventListener('click', function(){ copyText(ghlOutput(collect()), 'Email HTML'); });
 $('btnCopySubject').addEventListener('click', function(){ copyText(subjectLine(collect()), 'Subject'); });
-$('btnShowCode').addEventListener('click', function(){ var c=$('codebox'); c.style.display = c.style.display==='block'?'none':'block'; });
+$('btnShowCode').addEventListener('click', function(){
+  var c=$('codebox');
+  var show = c.style.display!=='block';
+  c.style.display = show?'block':'none';
+  this.textContent = show?'Hide HTML':'Show HTML';
+  if(show){ c.value = ghlOutput(collect()); c.scrollIntoView({behavior:'smooth', block:'center'}); c.focus(); c.select(); }
+});
 $('btnDownload').addEventListener('click', function(){
   var d=collect(); var blob=new Blob([fullDoc(d)],{type:'text/html'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -469,7 +475,7 @@ $('btnReset').addEventListener('click', function(){
   if(!confirm('Clear all fields?')) return;
   $('form').reset(); $('title').value='Exclusive Off-Market Deal'; initPhotos(3); render();
 });
-$('vwDesk').addEventListener('click', function(){ $('pv').style.width='600px'; this.classList.add('on'); $('vwMob').classList.remove('on'); });
+$('vwDesk').addEventListener('click', function(){ $('pv').style.width='680px'; this.classList.add('on'); $('vwMob').classList.remove('on'); });
 $('vwMob').addEventListener('click', function(){ $('pv').style.width='380px'; this.classList.add('on'); $('vwDesk').classList.remove('on'); });
 
 document.addEventListener('input', function(e){ if(e.target.closest('#form')) render(); });
