@@ -173,10 +173,8 @@ function HEAD(){ return ''
 +'    u + #body a { color:inherit; text-decoration:none; }\n'
 +'    .col  { display:inline-block; vertical-align:top; width:100%; max-width:296px; }\n'
 +'    .col3 { display:inline-block; vertical-align:top; width:100%; max-width:195px; }\n'
-+'    .mobile-cta { display:none !important; max-height:0 !important; overflow:hidden !important; mso-hide:all !important; }\n'
 +'    @media screen and (max-width:600px) {\n'
 +'      .email-container { width:100% !important; }\n'
-+'      .mobile-cta { display:block !important; max-height:none !important; overflow:visible !important; }\n'
 +'      .px { padding-left:20px !important; padding-right:20px !important; }\n'
 +'      .h1 { font-size:24px !important; line-height:30px !important; }\n'
 +'      .hero-img { height:auto !important; }\n'
@@ -304,10 +302,6 @@ function ctaRow(){
     +'<p style="margin:0 0 6px 0;font-size:19px;font-weight:bold;color:#ffffff;">Call or Text Silvia for Info</p>'
     +'<p style="margin:0 0 16px 0;"><a href="tel:'+PHONE_TEL+'" style="font-size:26px;font-weight:bold;color:#c9a962;text-decoration:none;letter-spacing:.5px;">'+PHONE_DISP+'</a></p>'
     +'<p style="margin:0;font-size:14px;line-height:21px;color:#d6dbe6;">If this property doesn&apos;t fit your criteria, send me your buy box requirements to be notified of any future deals that may be a better fit.</p>'
-    +'<table class="mobile-cta" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;"><tr>'
-    +'<td class="stack-td" valign="top" style="padding:0 8px 0 0;"><a class="stack-btn" href="tel:'+PHONE_TEL+'" target="_blank" style="display:inline-block;background-color:#c9a962;color:#1a2e4c;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;line-height:46px;padding:0 16px;border-radius:5px;text-decoration:none;mso-line-height-rule:exactly;-webkit-text-size-adjust:none;">&#9742; Call About This Deal</a></td>'
-    +'<td class="stack-td stack-td-last" valign="top" style="padding:0;"><a class="stack-btn" href="sms:'+PHONE_TEL+'" target="_blank" style="display:inline-block;background-color:#ffffff;color:#1a2e4c;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;line-height:44px;padding:0 16px;border-radius:5px;text-decoration:none;border:1px solid #c9a962;mso-line-height-rule:exactly;-webkit-text-size-adjust:none;">&#9993; Text About This Deal</a></td>'
-    +'</tr></table>'
     +'</td></tr></table></td></tr>';
 }
 function addressRow(city, zip){
