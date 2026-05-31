@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Feather — Investor Deal Email Builder</title>
+<style>
+  :root{
+    --navy:#1a2e4c; --gold:#c9a962; --cream:#f8f6f1; --ink:#1f2733; --muted:#5a6577; --line:#e2ddd0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);background:#eef1f5;}
+  header{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20;}
+  header .brand{font-weight:700;font-size:16px;letter-spacing:.3px;}
+  header .brand span{color:var(--gold);}
+  header .actions{display:flex;gap:8px;flex-wrap:wrap;}
+  button.act{background:var(--gold);color:var(--navy);border:0;border-radius:7px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;}
+  button.act.alt{background:#fff;color:var(--navy);border:1px solid var(--gold);}
+  button.act:active{transform:translateY(1px);}
+  .wrap{display:grid;grid-template-columns:minmax(340px,440px) 1fr;gap:0;min-height:calc(100vh - 56px);}
+  @media (max-width:860px){ .wrap{grid-template-columns:1fr;} .preview-pane{position:static!important;height:auto!important;} }
+  /* FORM */
+  .form{padding:20px 22px 60px;overflow:auto;background:#fff;border-right:1px solid #dfe3ea;}
+  .form h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:26px 0 10px;border-bottom:1px solid #eceef2;padding-bottom:6px;}
+  .form h2:first-child{margin-top:4px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:#3d4452;margin-bottom:4px;}
+  .field .hintnote{font-weight:400;color:#9aa3b2;font-size:11px;}
+  .field input, .field textarea{width:100%;padding:9px 10px;border:1px solid #d3d8e0;border-radius:6px;font-size:13px;font-family:inherit;color:var(--ink);}
+  .field input:focus, .field textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,169,98,.25);}
+  .field textarea{min-height:84px;resize:vertical;}
+  .photoRow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .photoRow .num{flex:0 0 58px;font-size:11px;font-weight:700;color:var(--navy);}
+  .photoRow input{flex:1;}
+  .addphoto{font-size:12px;color:var(--navy);background:#f3f0e8;border:1px dashed var(--gold);border-radius:6px;padding:8px;width:100%;cursor:pointer;font-weight:600;}
+  .pill{display:inline-block;font-size:11px;font-weight:700;background:var(--navy);color:#fff;border-radius:20px;padding:3px 10px;margin-left:8px;}
+  .tip{background:#fbf8f0;border:1px solid #ece3cb;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:#6b6450;margin-bottom:14px;}
+  .tip b{color:var(--navy);}
+  /* PREVIEW */
+  .preview-pane{position:sticky;top:56px;height:calc(100vh - 56px);display:flex;flex-direction:column;background:#dfe3ea;}
+  .preview-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:#cfd5de;font-size:12px;color:#3d4452;}
+  .preview-bar .seg{display:flex;gap:4px;}
+  .preview-bar .seg button{border:0;background:#fff;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--navy);}
+  .preview-bar .seg button.on{background:var(--navy);color:#fff;}
+  .frameWrap{flex:1;overflow:auto;display:flex;justify-content:center;padding:18px;}
+  iframe#pv{background:#fff;border:0;box-shadow:0 6px 24px rgba(0,0,0,.14);transition:width .15s ease;}
+  .warn{background:#fff3f1;color:#a3372a;border:1px solid #f0c8c1;border-radius:6px;padding:7px 10px;font-size:12px;margin-top:8px;display:none;}
+  .ok{color:#2e7d4f;}
+  /* subject row */
+  .subjectbox{display:flex;gap:8px;align-items:center;margin-top:6px;}
+  .subjectbox input{flex:1;background:#f7f9fc;}
+  .copybtn{background:var(--navy);color:#fff;border:0;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .codebox{width:100%;min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:11px;border:1px solid #d3d8e0;border-radius:6px;padding:10px;margin-top:8px;display:none;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Modern <span>Feather</span> &nbsp;·&nbsp; Investor Deal Email Builder</div>
+  <div class="actions">
+    <button class="act alt" id="btnReset" type="button">Clear</button>
+    <button class="act alt" id="btnShowCode" type="button">Show HTML</button>
+    <button class="act alt" id="btnDownload" type="button">Download .html</button>
+    <button class="act" id="btnCopy" type="button">Copy HTML for GHL</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ============ FORM ============ -->
+  <form class="form" id="form" autocomplete="off" onsubmit="return false;">
+    <div class="tip">
+      <b>How to use:</b> Fill in the fields → watch the email build on the right → click <b>Copy HTML for GHL</b> → in GHL, clone your template, drop a <b>Code</b> block, and paste.
+      <br><br><b>Photos:</b> upload them to GHL's media library first, copy each photo's URL, and paste below. The layout changes automatically by how many you add.
+    </div>
+
+    <h2>Title</h2>
+    <div class="field">
+      <label>Email title <span class="hintnote">(the gold line above the first photo)</span></label>
+      <input id="title" value="Exclusive Off-Market Deal">
+    </div>
+
+    <h2>Photos <span class="pill" id="photoCount">0 photos</span></h2>
+    <div class="field">
+      <label>Photo links <span class="hintnote">— paste the hosted image URL for each. Photo 1 is the big hero.</span></label>
+      <div id="photoList"></div>
+      <button type="button" class="addphoto" id="addPhoto">+ Add another photo</button>
+      <div class="warn" id="photoWarn">Add at least Photo 1 (the hero image).</div>
+    </div>
+
+    <h2>Location</h2>
+    <div class="field">
+      <label>City, State</label>
+      <input id="city" placeholder="Dallas, TX">
+    </div>
+    <div class="field">
+      <label>ZIP</label>
+      <input id="zip" placeholder="75208">
+    </div>
+
+    <h2>Description</h2>
+    <div class="field">
+      <label>Property description <span class="hintnote">(short paragraph)</span></label>
+      <textarea id="description" placeholder="2 bed / 1 bath in Dallas 75208. Conversion to 3/2 started but not finished. Plumbing updated, roof 10+ yrs, foundation previously repaired, HVAC ~5 yrs, electrical updated, new flooring throughout. Granite kitchen counters added."></textarea>
+    </div>
+
+    <h2>The Numbers <span class="hintnote" style="text-transform:none;letter-spacing:0;font-weight:400;">— leave any blank to hide that row</span></h2>
+    <div class="field"><label>Asking Price</label><input id="askingPrice" placeholder="$230,000"></div>
+    <div class="field"><label>ARV (Est. Sale Price)</label><input id="arv" placeholder="$310,000"></div>
+    <div class="field"><label>Est. Rehab</label><input id="rehab" placeholder="$45,000"></div>
+    <div class="field"><label>Est. Rent / mo</label><input id="rent" placeholder="$2,150/mo"></div>
+    <div class="field"><label>Cap Rate / CoC</label><input id="cap" placeholder="8.2%"></div>
+    <div class="field"><label>Property Type</label><input id="ptype" placeholder="Single-Family"></div>
+    <div class="field"><label>Beds / Baths / SqFt</label><input id="beds" placeholder="3 / 2 / 1,480"></div>
+
+    <h2>Suggested subject line</h2>
+    <div class="subjectbox">
+      <input id="subject" readonly>
+      <button type="button" class="copybtn" id="btnCopySubject">Copy</button>
+    </div>
+
+    <textarea class="codebox" id="codebox" readonly></textarea>
+  </form>
+
+  <!-- ============ PREVIEW ============ -->
+  <div class="preview-pane">
+    <div class="preview-bar">
+      <div>Live preview</div>
+      <div class="seg">
+        <button type="button" id="vwDesk" class="on">Desktop</button>
+        <button type="button" id="vwMob">Mobile</button>
+      </div>
+    </div>
+    <div class="frameWrap">
+      <iframe id="pv" style="width:600px;height:100%;" title="Email preview"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+/* ============================================================
+   Modern Feather — Investor Deal Email generator
+   Produces the bulletproof email HTML from the form inputs.
+   Mirrors investor-email-final.html exactly (full-bleed photos,
+   tap-to-enlarge, dynamic photo layout + dynamic stat rows).
+   ============================================================ */
+
+var PHONE_TEL = "+19728277334";
+var PHONE_DISP = "(972) 827-7334";
+var INSTAGRAM = "https://www.instagram.com/silvia_dfw_realtor/";
+var IG_HANDLE = "@silvia_dfw_realtor";
+var EMAIL = "silvia@modernfeather.com";
+var MF_LOGO  = "https://assets.cdn.filesafe.space/WOjtV7kTGGOFcPo89ohC/media/682631e38c2bd54c0d3f38e5.png";
+var HEADSHOT = "https://assets.cdn.filesafe.space/WOjtV7kTGGOFcPo89ohC/media/6904db12817ba09953fd979b.png";
+var BK_LOGO  = "https://assets.cdn.filesafe.space/WOjtV7kTGGOFcPo89ohC/media/69cdcdfa2a8b88a033f38c2b.png";
+var PLACEHOLDER = "https://placehold.co/1200x640/1a2e4c/c9a962?text=Add+Photo+1+URL";
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function nl2br(s){ return esc(s).replace(/\r?\n/g,'<br>'); }
+
+/* ---------- HEAD (style block) ---------- */
+function HEAD(){ return ''
++'  <style type="text/css">\n'
++'    :root { color-scheme: light dark; supported-color-schemes: light dark; }\n'
++'    body { margin:0 !important; padding:0 !important; width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }\n'
++'    table { border-collapse:collapse !important; mso-table-lspace:0pt; mso-table-rspace:0pt; }\n'
++'    img { border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; line-height:100%; }\n'
++'    a { text-decoration:none; }\n'
++'    p { margin:0; }\n'
++'    a[x-apple-data-detectors], .unstyle-auto-detected-links a, .aBn { color:inherit !important; text-decoration:none !important; font-size:inherit !important; font-family:inherit !important; font-weight:inherit !important; line-height:inherit !important; }\n'
++'    u + #body a { color:inherit; text-decoration:none; }\n'
++'    .col  { display:inline-block; vertical-align:top; width:100%; max-width:296px; }\n'
++'    .col3 { display:inline-block; vertical-align:top; width:100%; max-width:195px; }\n'
++'    .mobile-cta { display:none !important; max-height:0 !important; overflow:hidden !important; mso-hide:all !important; }\n'
++'    @media screen and (max-width:600px) {\n'
++'      .email-container { width:100% !important; }\n'
++'      .mobile-cta { display:block !important; max-height:none !important; overflow:visible !important; }\n'
++'      .px { padding-left:20px !important; padding-right:20px !important; }\n'
++'      .h1 { font-size:24px !important; line-height:30px !important; }\n'
++'      .hero-img { height:auto !important; }\n'
++'      .btn-a { display:block !important; width:100% !important; max-width:100% !important; box-sizing:border-box !important; }\n'
++'      .col, .col3 { max-width:100% !important; }\n'
++'      .photo-gap { width:100% !important; height:10px !important; line-height:10px !important; }\n'
++'      .stack-td { display:block !important; width:100% !important; padding:0 0 10px 0 !important; }\n'
++'      .stack-td-last { padding:0 !important; }\n'
++'      .stack-btn { display:block !important; width:100% !important; text-align:center !important; box-sizing:border-box !important; }\n'
++'      .stat-value { font-size:20px !important; }\n'
++'    }\n'
++'    @media (prefers-color-scheme: dark) {\n'
++'      .dm-bg { background-color:#0f1626 !important; }\n'
++'      .dm-card { background-color:#16213a !important; }\n'
++'      .dm-text { color:#f5f5f5 !important; }\n'
++'      .dm-muted { color:#b8c2d6 !important; }\n'
++'      .dm-stat-card { background-color:#1d2840 !important; border-color:#2c3a57 !important; }\n'
++'      .dm-stat-label { color:#c9bfa6 !important; }\n'
++'      .dm-divider { border-color:#2c3a57 !important; }\n'
++'    }\n'
++'    [data-ogsc] .dm-text { color:#f5f5f5 !important; }\n'
++'    [data-ogsc] .dm-muted { color:#b8c2d6 !important; }\n'
++'    [data-ogsc] .dm-stat-label { color:#c9bfa6 !important; }\n'
++'    [data-ogsb] .dm-bg { background-color:#0f1626 !important; }\n'
++'    [data-ogsb] .dm-card { background-color:#16213a !important; }\n'
++'    [data-ogsb] .dm-stat-card { background-color:#1d2840 !important; }\n'
++'  </style>\n'; }
+
+/* ---------- PHOTO BLOCK pieces (full-bleed, tap-to-enlarge) ---------- */
+function heroImg(url, h, top, alt){
+  h = h||320; top = top||0;
+  var pad = top ? (top+'px 0 0 0') : '0';
+  var u = esc(url);
+  return '<tr><td class="dm-card" bgcolor="#ffffff" style="background-color:#ffffff;padding:'+pad+';font-size:0;line-height:0;">'
+    +'<a href="'+u+'" target="_blank" style="display:block;text-decoration:none;border:0;">'
+    +'<img src="'+u+'" width="600" height="'+h+'" alt="'+esc(alt||'Property photo')+'" class="hero-img" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>';
+}
+function GAP(){ return '<!--[if !mso]><!-- --><div class="photo-gap" style="display:inline-block;width:6px;height:0;line-height:0;font-size:0;">&nbsp;</div><!--<![endif]-->'; }
+function cell(cls, mw, url, alt){
+  var u = esc(url);
+  return '<div class="'+cls+'" style="display:inline-block;vertical-align:top;width:100%;max-width:'+mw+'px;">'
+    +'<a href="'+u+'" target="_blank" style="display:block;text-decoration:none;border:0;">'
+    +'<img src="'+u+'" width="'+mw+'" height="'+Math.round(mw*0.66)+'" alt="'+esc(alt||'Property photo')+'" style="display:block;width:100%;max-width:'+mw+'px;height:auto;border:0;"></a></div>';
+}
+function strip2(a, b, top){
+  top = top||'6px';
+  return '<tr><td class="dm-card" bgcolor="#ffffff" style="background-color:#ffffff;padding:'+top+' 0 0 0;font-size:0;" align="center">'
+    +'<!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td width="296" valign="top"><![endif]-->'
+    +cell('col',296,a)
+    +'<!--[if mso]></td><td width="6">&nbsp;</td><td width="296" valign="top"><![endif]-->'
+    +GAP()+cell('col',296,b)
+    +'<!--[if mso]></td></tr></table><![endif]--></td></tr>';
+}
+function strip3(a, b, c){
+  return '<tr><td class="dm-card" bgcolor="#ffffff" style="background-color:#ffffff;padding:6px 0 0 0;font-size:0;" align="center">'
+    +'<!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td width="195" valign="top"><![endif]-->'
+    +cell('col3',195,a)
+    +'<!--[if mso]></td><td width="6">&nbsp;</td><td width="195" valign="top"><![endif]-->'
+    +GAP()+cell('col3',195,b)
+    +'<!--[if mso]></td><td width="6">&nbsp;</td><td width="195" valign="top"><![endif]-->'
+    +GAP()+cell('col3',195,c)
+    +'<!--[if mso]></td></tr></table><![endif]--></td></tr>';
+}
+function HINT(){
+  return '<tr><td class="dm-card" bgcolor="#ffffff" style="background-color:#ffffff;padding:8px 30px 0 30px;font-family:Arial,Helvetica,sans-serif;text-align:center;">'
+    +'<span class="dm-muted" style="font-size:11px;color:#8a8270;letter-spacing:.3px;">&#128269;&nbsp; Tap any photo to view full size</span></td></tr>';
+}
+function photoSection(urls){
+  urls = urls.filter(function(u){ return u && u.trim(); });
+  var n = urls.length;
+  if(n===0) return heroImg(PLACEHOLDER,320,0,'Add a photo') ;          // preview only
+  if(n===1) return heroImg(urls[0],360) + HINT();
+  if(n===2) return heroImg(urls[0]) + heroImg(urls[1],320,10) + HINT();
+  if(n===3) return heroImg(urls[0]) + strip2(urls[1],urls[2]) + HINT();
+  if(n===4) return heroImg(urls[0]) + strip3(urls[1],urls[2],urls[3]) + HINT();
+  // 5+ : hero + 2-col grid of the rest; trailing odd photo = full width
+  var out = heroImg(urls[0]);
+  var rest = urls.slice(1);
+  for(var i=0;i<rest.length;i+=2){
+    if(i+1 < rest.length) out += strip2(rest[i], rest[i+1]);
+    else out += heroImg(rest[i],320,6);
+  }
+  return out + HINT();
+}
+
+/* ---------- STATS (only filled rows) ---------- */
+var STAT_DEFS = [
+  ['askingPrice','Asking Price', true],
+  ['arv','ARV (Est. Sale Price)', true],
+  ['rehab','Est. Rehab', false],
+  ['rent','Est. Rent / mo', false],
+  ['cap','Cap Rate / CoC', false],
+  ['ptype','Property Type', false],
+  ['beds','Beds / Baths / SqFt', false]
+];
+function statSection(d){
+  var rows = STAT_DEFS.filter(function(s){ return d[s[0]] && d[s[0]].trim(); });
+  if(!rows.length) return '';
+  var html = '<tr><td class="dm-card px" bgcolor="#ffffff" style="background-color:#ffffff;padding:14px 30px 4px 30px;">'
+    +'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="dm-stat-card" bgcolor="#f8f6f1" style="background-color:#f8f6f1;border:1px solid #e7e2d6;border-radius:6px;">';
+  rows.forEach(function(s, idx){
+    var last = idx === rows.length-1;
+    var bb = last ? '' : 'border-bottom:1px solid #e7e2d6;';
+    var dmDiv = last ? '' : 'dm-divider';
+    var valStyle = s[2] ? 'font-size:22px;font-weight:bold;color:#1a2e4c;' : 'font-size:18px;font-weight:bold;color:#2d2d2d;';
+    var valCls = s[2] ? 'dm-text stat-value' : 'dm-text';
+    html += '<tr>'
+      +'<td class="'+dmDiv+'" valign="middle" style="padding:14px 18px;'+bb+'font-family:Arial,Helvetica,sans-serif;"><span class="dm-stat-label" style="font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#8a8270;">'+esc(s[1])+'</span></td>'
+      +'<td class="'+dmDiv+'" align="right" valign="middle" style="padding:14px 18px;'+bb+'font-family:Arial,Helvetica,sans-serif;"><span class="'+valCls+'" style="'+valStyle+'">'+esc(d[s[0]])+'</span></td>'
+      +'</tr>';
+  });
+  html += '</table></td></tr>';
+  return html;
+}
+
+/* ---------- static sections ---------- */
+function titleRow(t){
+  return '<tr><td class="dm-card" bgcolor="#ffffff" style="background-color:#ffffff;padding:22px 30px 14px 30px;text-align:center;font-family:Arial,Helvetica,sans-serif;">'
+    +'<span style="display:inline-block;font-size:18px;font-weight:bold;letter-spacing:2.5px;text-transform:uppercase;color:#c9a962;">'+esc(t||'Exclusive Off-Market Deal')+'</span></td></tr>';
+}
+function ctaRow(){
+  return '<tr><td class="dm-card px" bgcolor="#ffffff" style="background-color:#ffffff;padding:24px 30px 6px 30px;">'
+    +'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#1a2e4c" class="dm-stat-card" style="background-color:#1a2e4c;border-radius:6px;"><tr>'
+    +'<td style="padding:24px 24px 22px 24px;font-family:Arial,Helvetica,sans-serif;" align="center">'
+    +'<p style="margin:0 0 6px 0;font-size:19px;font-weight:bold;color:#ffffff;">Call or Text Silvia for Info</p>'
+    +'<p style="margin:0 0 16px 0;"><a href="tel:'+PHONE_TEL+'" style="font-size:26px;font-weight:bold;color:#c9a962;text-decoration:none;letter-spacing:.5px;">'+PHONE_DISP+'</a></p>'
+    +'<p style="margin:0;font-size:14px;line-height:21px;color:#d6dbe6;">If this property doesn&apos;t fit your criteria, send me your buy box requirements to be notified of any future deals that may be a better fit.</p>'
+    +'<table class="mobile-cta" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;"><tr>'
+    +'<td class="stack-td" valign="top" style="padding:0 8px 0 0;"><a class="stack-btn" href="tel:'+PHONE_TEL+'" target="_blank" style="display:inline-block;background-color:#c9a962;color:#1a2e4c;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;line-height:46px;padding:0 16px;border-radius:5px;text-decoration:none;mso-line-height-rule:exactly;-webkit-text-size-adjust:none;">&#9742; Call About This Deal</a></td>'
+    +'<td class="stack-td stack-td-last" valign="top" style="padding:0;"><a class="stack-btn" href="sms:'+PHONE_TEL+'" target="_blank" style="display:inline-block;background-color:#ffffff;color:#1a2e4c;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;line-height:44px;padding:0 16px;border-radius:5px;text-decoration:none;border:1px solid #c9a962;mso-line-height-rule:exactly;-webkit-text-size-adjust:none;">&#9993; Text About This Deal</a></td>'
+    +'</tr></table>'
+    +'</td></tr></table></td></tr>';
+}
+function addressRow(city, zip){
+  var c = city && city.trim() ? esc(city) : 'City, State';
+  var z = zip && zip.trim() ? '<span class="dm-muted" style="display:block;padding-top:5px;font-size:15px;color:#5a6577;">ZIP '+esc(zip)+'</span>' : '';
+  return '<tr><td class="dm-card px" bgcolor="#ffffff" style="background-color:#ffffff;padding:26px 30px 6px 30px;">'
+    +'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'
+    +'<td align="center" class="dm-text unstyle-auto-detected-links" style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1a2e4c;text-align:center;">'
+    +'<span class="h1 dm-text" style="display:block;font-size:26px;line-height:32px;font-weight:bold;color:#1a2e4c;mso-line-height-rule:exactly;">'+c+'</span>'+z
+    +'</td></tr></table></td></tr>';
+}
+function descRow(desc){
+  if(!desc || !desc.trim()) return '';
+  return '<tr><td class="dm-card px" bgcolor="#ffffff" style="background-color:#ffffff;padding:6px 30px 10px 30px;">'
+    +'<p class="dm-muted" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:23px;color:#3d4452;margin:0;text-align:left;">'+nl2br(desc)+'</p></td></tr>';
+}
+function footerRow(){
+  return '<tr><td class="dm-bg" bgcolor="#f8f6f1" style="background-color:#f8f6f1;padding:30px 30px 34px 30px;">'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>'
+    +'<td valign="top" width="116" style="width:116px;padding:0 16px 0 0;"><img src="'+HEADSHOT+'" width="100" height="100" alt="Silvia Poulin" style="display:block;width:100px;height:100px;border-radius:50%;border:0;"></td>'
+    +'<td valign="top" style="font-family:Arial,Helvetica,sans-serif;">'
+    +'<span class="dm-text" style="display:block;font-size:18px;font-weight:bold;color:#1a2e4c;">Silvia Poulin</span>'
+    +'<span class="dm-muted" style="display:block;font-size:13px;color:#5a6577;padding-top:3px;">REALTOR&reg; | BK Real Estate</span>'
+    +'<span class="dm-muted" style="display:block;font-size:13px;color:#5a6577;">Owner | Modern Feather Realty Group</span>'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0 8px;"><tr><td width="190" style="border-top:1px solid #c9a962;font-size:0;line-height:0;">&nbsp;</td></tr></table>'
+    +'<span class="dm-text" style="display:block;font-size:13px;color:#1a2e4c;padding-bottom:3px;">&#9742;&nbsp;&nbsp;<a class="dm-text" href="tel:'+PHONE_TEL+'" style="color:#1a2e4c;text-decoration:none;">'+PHONE_DISP+'</a></span>'
+    +'<span class="dm-text" style="display:block;font-size:13px;color:#1a2e4c;padding-bottom:3px;">&#9993;&nbsp;&nbsp;<a class="dm-text" href="mailto:'+EMAIL+'" style="color:#1a2e4c;text-decoration:none;">'+EMAIL+'</a></span>'
+    +'<span class="dm-text" style="display:block;font-size:13px;color:#1a2e4c;">&#128247;&nbsp;&nbsp;<a class="dm-text" href="'+INSTAGRAM+'" target="_blank" style="color:#1a2e4c;text-decoration:none;">'+IG_HANDLE+'</a></span>'
+    +'</td></tr></table>'
+    +'<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 0 0;"><tr>'
+    +'<td valign="middle" style="padding:0 22px 0 0;"><img src="'+MF_LOGO+'" width="150" alt="Modern Feather Realty Group" style="display:block;width:150px;max-width:150px;height:auto;border:0;"></td>'
+    +'<td valign="middle"><img src="'+BK_LOGO+'" width="60" alt="BK Real Estate" style="display:block;width:60px;max-width:60px;height:auto;border:0;"></td>'
+    +'</tr></table>'
+    +'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:22px;"><tr>'
+    +'<td style="font-family:Arial,Helvetica,sans-serif;padding:0 0 10px 0;"><p class="dm-muted" style="margin:0;font-size:12px;line-height:17px;color:#6b7280;">This represents an estimated sale price for this property. It is not the same as the opinion of value in an appraisal developed by a licensed appraiser under the Uniform Standards of Professional Appraisal Practice.</p></td></tr>'
+    +'<tr><td style="font-family:Arial,Helvetica,sans-serif;border-top:1px solid #e2ddd0;padding:12px 0 0 0;">'
+    +'<p class="dm-muted" style="margin:0 0 8px 0;font-size:11px;line-height:16px;color:#8a8270;"><strong>Advertisement.</strong> You are receiving this because you opted in to receive off-market and investment property deals from Modern Feather Realty Group.</p>'
+    +'<p class="dm-muted" style="margin:0;font-size:11px;line-height:16px;color:#8a8270;">BK Real Estate, LLC<br>200 N Kimball Suite 221 #1113<br>Southlake, TX 76092</p>'
+    +'</td></tr></table></td></tr>';
+}
+
+/* ---------- preheader ---------- */
+function preheader(d){
+  var bits=[];
+  if(d.askingPrice) bits.push(esc(d.askingPrice)+' asking');
+  if(d.arv) bits.push('ARV '+esc(d.arv));
+  if(d.rehab) bits.push('~'+esc(d.rehab)+' rehab');
+  var head = bits.join(' &bull; ');
+  var tail = d.city ? ' &mdash; first look at '+esc(d.city)+'.' : '';
+  var spacer = ''; for(var i=0;i<24;i++){ spacer += '&nbsp;&zwnj;'; }
+  return '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f8f6f1;opacity:0;">'+head+tail+' '+spacer+'</div>';
+}
+
+/* ---------- assemble ---------- */
+function bodyContent(d){
+  return ''
+  + preheader(d)
+  + '<div role="article" aria-roledescription="email" aria-label="New off-market investment deal" lang="en" style="background-color:#f8f6f1;" class="dm-bg">'
+  + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f8f6f1" class="dm-bg" style="background-color:#f8f6f1;"><tr><td align="center" style="padding:0;">'
+  + '<!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="600"><tr><td><![endif]-->'
+  + '<table role="presentation" class="email-container" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:600px;">'
+  + titleRow(d.title)
+  + photoSection(d.photos)
+  + ctaRow()
+  + addressRow(d.city, d.zip)
+  + descRow(d.description)
+  + statSection(d)
+  + footerRow()
+  + '</table>'
+  + '<!--[if mso]></td></tr></table><![endif]-->'
+  + '</td></tr></table></div>';
+}
+
+/* Output for GHL Code block = <style> + body content (no outer html/head, so GHL keeps its own).
+   The template is fluid-hybrid, so it still holds together even if GHL strips <style>. */
+function ghlOutput(d){ return HEAD() + '\n' + bodyContent(d); }
+
+/* Full standalone document = for Download / live preview */
+function fullDoc(d){
+  return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
+  + '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en"><head>'
+  + '<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="x-apple-disable-message-reformatting">'
+  + '<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><title>'+esc(d.title||'Off-Market Deal')+'</title>'
+  + '<!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml></noscript><![endif]-->'
+  + HEAD()
+  + '</head><body id="body" class="dm-bg" style="margin:0;padding:0;width:100%;background-color:#f8f6f1;" bgcolor="#f8f6f1">'
+  + bodyContent(d)
+  + '</body></html>';
+}
+
+function subjectLine(d){
+  var parts = ['Off-Market Deal'];
+  if(d.city) parts.push(d.city.trim());
+  var s = parts.join(': ');
+  if(d.askingPrice) s += ' — ' + d.askingPrice.trim();
+  return s;
+}
+
+/* ============ form wiring ============ */
+var $ = function(id){ return document.getElementById(id); };
+var photoInputs = [];
+function makePhotoRow(idx){
+  var row = document.createElement('div'); row.className='photoRow';
+  var num = document.createElement('div'); num.className='num'; num.textContent = idx===0 ? 'Hero' : ('Photo '+(idx+1));
+  var inp = document.createElement('input'); inp.type='url'; inp.placeholder='https://assets.cdn.filesafe.space/.../photo.jpg';
+  inp.addEventListener('input', render);
+  row.appendChild(num); row.appendChild(inp);
+  $('photoList').appendChild(row);
+  photoInputs.push(inp);
+}
+function initPhotos(n){ $('photoList').innerHTML=''; photoInputs=[]; for(var i=0;i<n;i++) makePhotoRow(i); }
+
+function collect(){
+  return {
+    title: $('title').value,
+    city: $('city').value, zip: $('zip').value,
+    description: $('description').value,
+    askingPrice: $('askingPrice').value, arv: $('arv').value, rehab: $('rehab').value,
+    rent: $('rent').value, cap: $('cap').value, ptype: $('ptype').value, beds: $('beds').value,
+    photos: photoInputs.map(function(i){ return i.value; })
+  };
+}
+function render(){
+  var d = collect();
+  var filled = d.photos.filter(function(u){ return u && u.trim(); }).length;
+  $('photoCount').textContent = filled + (filled===1?' photo':' photos');
+  $('photoWarn').style.display = filled===0 ? 'block' : 'none';
+  // preview
+  $('pv').srcdoc = fullDoc(d);
+  // outputs
+  $('codebox').value = ghlOutput(d);
+  $('subject').value = subjectLine(d);
+}
+
+/* actions */
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 1600); }
+function copyText(txt, label){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){ toast(label+' copied!'); }, function(){ fallbackCopy(txt,label); });
+  } else { fallbackCopy(txt,label); }
+}
+function fallbackCopy(txt,label){
+  var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); toast(label+' copied!'); }catch(e){ $('codebox').style.display='block'; toast('Select the code box and copy manually'); }
+  document.body.removeChild(ta);
+}
+
+$('addPhoto').addEventListener('click', function(){ makePhotoRow(photoInputs.length); });
+$('btnCopy').addEventListener('click', function(){ copyText(ghlOutput(collect()), 'Email HTML'); });
+$('btnCopySubject').addEventListener('click', function(){ copyText(subjectLine(collect()), 'Subject'); });
+$('btnShowCode').addEventListener('click', function(){ var c=$('codebox'); c.style.display = c.style.display==='block'?'none':'block'; });
+$('btnDownload').addEventListener('click', function(){
+  var d=collect(); var blob=new Blob([fullDoc(d)],{type:'text/html'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=(d.city? d.city.replace(/[^a-z0-9]+/gi,'-').toLowerCase() : 'deal')+'-email.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+$('btnReset').addEventListener('click', function(){
+  if(!confirm('Clear all fields?')) return;
+  $('form').reset(); $('title').value='Exclusive Off-Market Deal'; initPhotos(3); render();
+});
+$('vwDesk').addEventListener('click', function(){ $('pv').style.width='600px'; this.classList.add('on'); $('vwMob').classList.remove('on'); });
+$('vwMob').addEventListener('click', function(){ $('pv').style.width='380px'; this.classList.add('on'); $('vwDesk').classList.remove('on'); });
+
+document.addEventListener('input', function(e){ if(e.target.closest('#form')) render(); });
+
+/* init */
+initPhotos(3);
+render();
+</script>
+</body>
+</html>
